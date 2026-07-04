@@ -85,19 +85,7 @@ export default function Dashboard() {
     );
   }, [filteredIncidents]);
 
-  const departmentStats = useMemo(() => {
-    const stats: Record<string, number> = {};
-
-    filteredIncidents.forEach((incident) => {
-      stats[incident.department] =
-        (stats[incident.department] ?? 0) + 1;
-    });
-
-    return Object.entries(stats).sort(
-      (a, b) => b[1] - a[1]
-    );
-  }, [filteredIncidents]);
-
+  
   if (loading) {
     return (
       <section className="max-w-7xl mx-auto px-10 py-24">
