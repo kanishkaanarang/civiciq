@@ -19,6 +19,8 @@ import DecisionBrief from "./DecisionBrief";
 import IncidentMap from "./IncidentMap";
 import InfoCard from "./InfoCard";
 import Section from "./Section";
+import ResourceRecommendation from "./ResourceRecommendation";
+import OperationalForecast from "./OperationalForecast";
 
 interface Props {
   result: AnalysisResult;
@@ -135,6 +137,14 @@ export default function AIResultCard({
           required_departments={
             result.required_departments
           }
+        />
+
+        <ResourceRecommendation
+          result={result}
+        />
+
+        <OperationalForecast
+          result={result}
         />
 
         <Section

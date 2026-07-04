@@ -1,8 +1,8 @@
 import {
   addDoc,
   collection,
-  getDocs,
   serverTimestamp,
+  onSnapshot,
 } from "firebase/firestore";
 
 import { db } from "./firebase";
@@ -32,24 +32,58 @@ export async function saveIncident(
     location: result.location,
 
     priority_score: result.priority_score,
-    estimated_people_affected: result.estimated_people_affected,
-    estimated_resolution_time: result.estimated_resolution_time,
-    operational_impact: result.operational_impact,
-    required_departments: result.required_departments,
+    estimated_people_affected:
+      result.estimated_people_affected,
+
+    estimated_resolution_time:
+      result.estimated_resolution_time,
+
+    operational_impact:
+      result.operational_impact,
+
+    required_departments:
+      result.required_departments,
 
     createdAt: serverTimestamp(),
   });
 }
 
-/* ---------------- GET INCIDENTS ---------------- */
+/* ---------------- GET INCIDENTS (One Time) ---------------- */
 
 export async function getIncidents(): Promise<Incident[]> {
-  const snapshot = await getDocs(
-    collection(db, "incidents")
-  );
+  return new Promise((resolve) => {
+    const unsubscribe = onSnapshot(
+      collection(db, "incidents"),
+      (snapshot) => {
+        const incidents = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Incident, "id">),
+        }));
 
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...(doc.data() as Omit<Incident, "id">),
-  }));
+        unsubscribe();
+
+        resolve(incidents);
+      }
+    );
+  });
+}
+
+/* ---------------- REAL-TIME LISTENER ---------------- */
+
+export function subscribeToIncidents(
+  callback: (incidents: Incident[]) => void
+) {
+  return onSnapshot(
+    collection(db, "incidents"),
+    (snapshot) => {
+      const incidents: Incident[] = snapshot.docs.map(
+        (doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Incident, "id">),
+        })
+      );
+
+      callback(incidents);
+    }
+  );
 }
