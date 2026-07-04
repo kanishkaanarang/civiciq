@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://civiciq-f77f.onrender.com";
 
 export async function analyzeIssue(description: string) {
   const response = await fetch(`${API_URL}/analyze-text`, {

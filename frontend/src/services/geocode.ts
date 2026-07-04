@@ -5,7 +5,7 @@ export async function geocodeLocation(
 ): Promise<GeoLocation> {
 
   const response = await fetch(
-    "http://127.0.0.1:8000/geocode",
+    "https://civiciq-f77f.onrender.com/geocode",
     {
       method: "POST",
 

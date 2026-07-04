@@ -44,7 +44,7 @@ export default function ReportForm() {
         );
 
         response = await fetch(
-          "http://127.0.0.1:8000/analyze-multimodal",
+          "https://civiciq-f77f.onrender.com/analyze-multimodal",
           {
             method: "POST",
             body: formData,
@@ -52,7 +52,7 @@ export default function ReportForm() {
         );
       } else {
         response = await fetch(
-          "http://127.0.0.1:8000/analyze-text",
+          "https://civiciq-f77f.onrender.com/analyze-text",
           {
             method: "POST",
 
