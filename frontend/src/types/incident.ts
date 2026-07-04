@@ -1,33 +1,45 @@
 export interface Incident {
-  id: string;
 
-  description: string;
+    id:string;
 
-  category: string;
+    description:string;
 
-  severity: string;
+    category:string;
 
-  department: string;
+    severity:string;
 
-  confidence: number;
+    department:string;
 
-  summary: string;
+    confidence:number;
 
-  reasoning: string;
+    summary:string;
 
-  recommended_action: string;
+    reasoning:string;
 
-  location?: string;
+    recommended_action:string;
 
-  priority_score?: number;
+    location:string;
 
-  estimated_people_affected?: string;
+    priority_score:number;
 
-  estimated_resolution_time?: string;
+    estimated_people_affected:string;
 
-  operational_impact?: string;
+    estimated_resolution_time:string;
 
-  required_departments?: string[];
+    operational_impact:string;
 
-  createdAt?: any;
+    required_departments:string[];
+
+    resource_recommendation:any;
+
+    operational_forecast:any;
+
+    status:"Pending"|"Assigned"|"Resolved";
+
+    assignedDepartment:string|null;
+
+    assignedAt:any;
+
+    createdAt:any;
+
 }

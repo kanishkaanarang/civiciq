@@ -86,8 +86,10 @@ export default function Dashboard() {
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-10 py-24">
-
+    <section
+      id="dashboard"
+      className="max-w-7xl mx-auto px-10 py-24"
+    >
       <h2 className="text-5xl font-bold mb-12">
         City Operations Dashboard
       </h2>

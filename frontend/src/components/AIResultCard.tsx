@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { downloadReport } from "../services/pdf";
+import { assignIncident } from "../services/firestore";
 import { geocodeLocation } from "../services/geocode";
 
 import DecisionBrief from "./DecisionBrief";
@@ -24,15 +25,22 @@ import OperationalForecast from "./OperationalForecast";
 
 interface Props {
   result: AnalysisResult;
+  incidentId: string;
 }
 
 export default function AIResultCard({
   result,
+  incidentId,
 }: Props) {
 
   const [geo, setGeo] =
     useState<GeoLocation | null>(null);
 
+  const [assigned, setAssigned] =
+    useState(false);
+
+  const [assigning, setAssigning] =
+    useState(false);
   useEffect(() => {
 
     async function loadLocation() {
@@ -62,10 +70,42 @@ export default function AIResultCard({
 
   }, [result.location]);
 
+  async function handleAssign() {
+    if (!incidentId) return;
+
+    try {
+      setAssigning(true);
+
+      await assignIncident(
+        incidentId,
+        result.department
+      );
+
+      setAssigned(true);
+
+      alert(
+        `Incident assigned to ${result.department}`
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert("Assignment failed.");
+
+    } finally {
+
+      setAssigning(false);
+
+    }
+  }
+
   return (
 
-    <section className="max-w-6xl mx-auto px-10 mt-20">
-
+    <section
+      id="analysis-result"
+      className="max-w-6xl mx-auto px-10 mt-20"
+    >
       <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-10">
 
         <div className="flex items-center justify-between">
@@ -190,15 +230,22 @@ export default function AIResultCard({
           >
 
             Download Report
-
           </button>
-
-                    <button
-            className="rounded-xl border border-zinc-700 px-6 py-3 transition hover:bg-zinc-800"
+          <button
+            onClick={handleAssign}
+            disabled={assigned || assigning}
+            className={`rounded-xl px-6 py-3 transition ${
+              assigned
+                ? "bg-green-600 cursor-default"
+                : "border border-zinc-700 hover:bg-zinc-800"
+            }`}
           >
-            Send to Department
+            {assigning
+              ? "Assigning..."
+              : assigned
+              ? `✓ Assigned to ${result.department}`
+              : "Send to Department"}
           </button>
-
         </div>
 
       </div>

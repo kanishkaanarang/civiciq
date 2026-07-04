@@ -3,6 +3,8 @@ import {
   collection,
   serverTimestamp,
   onSnapshot,
+  updateDoc,
+  doc,
 } from "firebase/firestore";
 
 import { db } from "./firebase";
@@ -16,7 +18,7 @@ export async function saveIncident(
   description: string,
   result: AnalysisResult
 ) {
-  await addDoc(collection(db, "incidents"), {
+  const document = await addDoc(collection(db, "incidents"), {
     description,
 
     category: result.category,
@@ -27,11 +29,13 @@ export async function saveIncident(
 
     summary: result.summary,
     reasoning: result.reasoning,
+
     recommended_action: result.recommended_action,
 
     location: result.location,
 
     priority_score: result.priority_score,
+
     estimated_people_affected:
       result.estimated_people_affected,
 
@@ -44,31 +48,43 @@ export async function saveIncident(
     required_departments:
       result.required_departments,
 
+    resource_recommendation:
+      result.resource_recommendation,
+
+    operational_forecast:
+      result.operational_forecast,
+
+    status: "Pending",
+
+    assignedDepartment: null,
+
+    assignedAt: null,
+
     createdAt: serverTimestamp(),
   });
+
+  return document.id;
 }
 
-/* ---------------- GET INCIDENTS (One Time) ---------------- */
+/* ---------------- ASSIGN ---------------- */
 
-export async function getIncidents(): Promise<Incident[]> {
-  return new Promise((resolve) => {
-    const unsubscribe = onSnapshot(
-      collection(db, "incidents"),
-      (snapshot) => {
-        const incidents = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Incident, "id">),
-        }));
+export async function assignIncident(
+  incidentId: string,
+  department: string
+) {
+  await updateDoc(
+    doc(db, "incidents", incidentId),
+    {
+      status: "Assigned",
 
-        unsubscribe();
+      assignedDepartment: department,
 
-        resolve(incidents);
-      }
-    );
-  });
+      assignedAt: serverTimestamp(),
+    }
+  );
 }
 
-/* ---------------- REAL-TIME LISTENER ---------------- */
+/* ---------------- LIVE ---------------- */
 
 export function subscribeToIncidents(
   callback: (incidents: Incident[]) => void
@@ -76,12 +92,14 @@ export function subscribeToIncidents(
   return onSnapshot(
     collection(db, "incidents"),
     (snapshot) => {
-      const incidents: Incident[] = snapshot.docs.map(
-        (doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Incident, "id">),
-        })
-      );
+      const incidents: Incident[] =
+        snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...(docSnap.data() as Omit<
+            Incident,
+            "id"
+          >),
+        }));
 
       callback(incidents);
     }
