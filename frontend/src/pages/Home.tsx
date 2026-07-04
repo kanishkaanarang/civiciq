@@ -5,6 +5,7 @@ import LiveInsights from "../components/LiveInsights";
 import QuickActions from "../components/QuickActions";
 import ReportForm from "../components/ReportForm";
 import Dashboard from "../components/Dashboard";
+import Footer from "../components/Footer";
 
 export default function Home() {
   return (
@@ -22,6 +23,8 @@ export default function Home() {
       <ReportForm />
 
       <Dashboard />
+
+      <Footer />
     </div>
   );
 }

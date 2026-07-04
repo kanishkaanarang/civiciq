@@ -10,10 +10,15 @@ import {
   Building2,
   Brain,
   TrendingUp,
+  CheckCircle,
 } from "lucide-react";
 
 import { downloadReport } from "../services/pdf";
-import { assignIncident } from "../services/firestore";
+import {
+  assignIncident,
+  resolveIncident,
+} from "../services/firestore";
+
 import { geocodeLocation } from "../services/geocode";
 
 import DecisionBrief from "./DecisionBrief";
@@ -40,6 +45,12 @@ export default function AIResultCard({
     useState(false);
 
   const [assigning, setAssigning] =
+    useState(false);
+
+  const [resolved, setResolved] =
+  useState(false);
+
+  const [resolving, setResolving] =
     useState(false);
   useEffect(() => {
 
@@ -70,6 +81,8 @@ export default function AIResultCard({
 
   }, [result.location]);
 
+  if (assigned || assigning) return; 
+
   async function handleAssign() {
     if (!incidentId) return;
 
@@ -83,9 +96,7 @@ export default function AIResultCard({
 
       setAssigned(true);
 
-      alert(
-        `Incident assigned to ${result.department}`
-      );
+      setAssigned(true);
 
     } catch (err) {
 
@@ -96,6 +107,31 @@ export default function AIResultCard({
     } finally {
 
       setAssigning(false);
+
+    }
+  }
+
+  async function handleResolve() {
+    if (!incidentId) return;
+
+    try {
+      setResolving(true);
+
+      await resolveIncident(incidentId);
+
+      setResolved(true);
+
+      alert("Incident marked as resolved.");
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert("Failed to resolve incident.");
+
+    } finally {
+
+      setResolving(false);
 
     }
   }
@@ -223,29 +259,54 @@ export default function AIResultCard({
         <div className="mt-10 flex flex-wrap gap-4">
 
           <button
-            onClick={() =>
-              downloadReport(result)
-            }
+            onClick={() => downloadReport(result)}
             className="rounded-xl bg-blue-600 px-6 py-3 transition hover:bg-blue-700"
           >
-
             Download Report
           </button>
+
           <button
             onClick={handleAssign}
-            disabled={assigned || assigning}
-            className={`rounded-xl px-6 py-3 transition ${
+            disabled={assigned || assigning || resolved}
+            className={`rounded-xl px-6 py-3 transition flex items-center gap-2 ${
               assigned
-                ? "bg-green-600 cursor-default"
+                ? "bg-green-600"
                 : "border border-zinc-700 hover:bg-zinc-800"
             }`}
           >
-            {assigning
-              ? "Assigning..."
-              : assigned
-              ? `✓ Assigned to ${result.department}`
-              : "Send to Department"}
+            {assigned ? (
+              <>
+                <CheckCircle size={18} />
+                Assigned
+              </>
+            ) : assigning ? (
+              "Assigning..."
+            ) : (
+              "Send to Department"
+            )}
           </button>
+
+          <button
+            onClick={handleResolve}
+            disabled={!assigned || resolved || resolving}
+            className={`rounded-xl px-6 py-3 transition flex items-center gap-2 ${
+              resolved
+                ? "bg-blue-600"
+                : "border border-zinc-700 hover:bg-zinc-800"
+            }`}
+          >
+            {resolved ? (
+              <>
+                <CheckCircle size={18} />
+                Resolved
+              </>
+            ) : resolving ? (
+              "Resolving..."
+            ) : (
+              "Mark Resolved"
+            )}
+          </button>
+
         </div>
 
       </div>

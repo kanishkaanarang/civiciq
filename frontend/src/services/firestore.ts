@@ -83,6 +83,18 @@ export async function assignIncident(
     }
   );
 }
+/* ---------------- RESOLVE ---------------- */
+
+export async function resolveIncident(
+  incidentId: string
+) {
+  await updateDoc(
+    doc(db, "incidents", incidentId),
+    {
+      status: "Resolved",
+    }
+  );
+}
 
 /* ---------------- LIVE ---------------- */
 

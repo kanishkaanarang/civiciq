@@ -7,10 +7,23 @@ import {
 } from "../services/firestore";
 
 import RecentIncidents from "./RecentIncidents";
+import IncidentDetailsModal from "./IncidentDetailsModal";
+import DepartmentStatus from "./DepartmentStatus";
+import SeverityPieChart from "./SeverityPieChart";
 
 export default function Dashboard() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  const [statusFilter, setStatusFilter] =
+    useState("All");
+
+  const [severityFilter, setSeverityFilter] =
+    useState("All");
+
+  const [selectedIncident, setSelectedIncident] =
+    useState<Incident | null>(null);
 
   useEffect(() => {
     const unsubscribe = subscribeToIncidents((data) => {
@@ -23,30 +36,46 @@ export default function Dashboard() {
 
   const total = incidents.length;
 
-  const critical = incidents.filter(
-    (i) => i.severity === "Critical"
+
+  const resolved = incidents.filter(
+    (i) => i.status === "Resolved"
   ).length;
 
-  const high = incidents.filter(
-    (i) => i.severity === "High"
-  ).length;
-
-  const avgConfidence =
-    incidents.length === 0
+  const resolutionRate =
+    total === 0
       ? 0
-      : Math.round(
-          incidents.reduce(
-            (sum, i) => sum + (i.confidence ?? 0),
-            0
-          ) /
-            incidents.length *
-            100
-        );
+      : Math.round((resolved / total) * 100);
+  
+  const filteredIncidents = incidents.filter(
+    (incident) => {
+      const matchesSearch =
+        incident.category
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        incident.location
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === "All" ||
+        incident.status === statusFilter;
+
+      const matchesSeverity =
+        severityFilter === "All" ||
+        incident.severity === severityFilter;
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesSeverity
+      );
+    }
+  );
 
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = {};
 
-    incidents.forEach((incident) => {
+    filteredIncidents.forEach((incident) => {
       stats[incident.category] =
         (stats[incident.category] ?? 0) + 1;
     });
@@ -54,12 +83,12 @@ export default function Dashboard() {
     return Object.entries(stats).sort(
       (a, b) => b[1] - a[1]
     );
-  }, [incidents]);
+  }, [filteredIncidents]);
 
   const departmentStats = useMemo(() => {
     const stats: Record<string, number> = {};
 
-    incidents.forEach((incident) => {
+    filteredIncidents.forEach((incident) => {
       stats[incident.department] =
         (stats[incident.department] ?? 0) + 1;
     });
@@ -67,7 +96,7 @@ export default function Dashboard() {
     return Object.entries(stats).sort(
       (a, b) => b[1] - a[1]
     );
-  }, [incidents]);
+  }, [filteredIncidents]);
 
   if (loading) {
     return (
@@ -96,7 +125,7 @@ export default function Dashboard() {
 
       {/* KPI CARDS */}
 
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid md:grid-cols-5 gap-6">
 
         <Card
           title="Total Incidents"
@@ -104,28 +133,85 @@ export default function Dashboard() {
         />
 
         <Card
-          title="Critical"
-          value={String(critical)}
+          title="Pending"
+          value={String(
+            incidents.filter(
+              (i) => i.status === "Pending"
+            ).length
+          )}
         />
 
         <Card
-          title="High Priority"
-          value={String(high)}
+          title="Assigned"
+          value={String(
+            incidents.filter(
+              (i) => i.status === "Assigned"
+            ).length
+          )}
         />
 
         <Card
-          title="Avg Confidence"
-          value={`${avgConfidence}%`}
+          title="Resolved"
+          value={String(
+            incidents.filter(
+              (i) => i.status === "Resolved"
+            ).length
+          )}
         />
+
+        <Card
+          title="Resolution Rate"
+          value={`${resolutionRate}%`}
+        />
+
+      </div>
+      <div className="mt-10 flex flex-wrap gap-4">
+
+        <input
+          value={search}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
+          placeholder="Search incidents..."
+          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 w-72"
+        />
+
+        <select
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter(e.target.value)
+          }
+          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3"
+        >
+          <option>All</option>
+          <option>Pending</option>
+          <option>Assigned</option>
+          <option>Resolved</option>
+        </select>
+
+        <select
+          value={severityFilter}
+          onChange={(e) =>
+            setSeverityFilter(e.target.value)
+          }
+          className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3"
+        >
+          <option>All</option>
+          <option>Critical</option>
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
+        </select>
 
       </div>
 
       {/* ANALYTICS */}
 
-      <div className="grid lg:grid-cols-3 gap-8 mt-12">
+      <div className="grid lg:grid-cols-2 gap-8 mt-12">
 
         <RecentIncidents
-          incidents={incidents}
+          incidents={filteredIncidents}
+          onSelect={setSelectedIncident}
         />
 
         <AnalyticsCard
@@ -133,13 +219,21 @@ export default function Dashboard() {
           data={categoryStats}
         />
 
-        <AnalyticsCard
-          title="Department Workload"
-          data={departmentStats}
+        <SeverityPieChart
+          incidents={filteredIncidents}
+        />
+
+        <DepartmentStatus
+          incidents={filteredIncidents}
         />
 
       </div>
-
+      {selectedIncident && (
+        <IncidentDetailsModal
+          incident={selectedIncident}
+          onClose={() => setSelectedIncident(null)}
+        />
+      )}
     </section>
   );
 }
@@ -191,26 +285,39 @@ function AnalyticsCard({
             No data available.
           </p>
         ) : (
-          data.map(([label, count]) => (
+          data.map(([label, count]) => {
+            const max = data[0][1];
 
-            <div
-              key={label}
-              className="flex justify-between border-b border-zinc-800 pb-2"
-            >
+            return (
+              <div
+                key={label}
+                className="space-y-2"
+              >
+                <div className="flex justify-between">
 
-              <span>
-                {label}
-              </span>
+                  <span>{label}</span>
 
-              <span className="font-bold text-blue-400">
-                {count}
-              </span>
+                  <span className="font-bold text-blue-400">
+                    {count}
+                  </span>
 
-            </div>
+                </div>
 
-          ))
+                <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+
+                  <div
+                    className="h-full rounded-full bg-blue-500"
+                    style={{
+                      width: `${(count / max) * 100}%`,
+                    }}
+                  />
+
+                </div>
+
+              </div>
+            );
+          })
         )}
-
       </div>
 
     </div>
