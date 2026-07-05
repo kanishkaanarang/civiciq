@@ -14,8 +14,7 @@
 
 Turning citizen reports into actionable operational intelligence with multimodal AI, predictive analytics, and intelligent decision support.
 
-[Live Demo](https://civiciq-gamma.vercel.app/) · [Backend API](https://civiciq-f77f.onrender.com/) · [Report a Bug](#)
-
+[Live Demo](https://civiciq-gamma.vercel.app/) · [Backend API](https://civiciq-f77f.onrender.com/) 
 </div>
 
 ---
