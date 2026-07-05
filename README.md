@@ -221,13 +221,27 @@ Google Gemini · Prompt Engineering · Multimodal AI · Natural Language Underst
 
 ## 📸 Screenshots
 
-| Landing Page | AI Analysis |
-|---|---|
-| *add screenshot* | *add screenshot* |
+### Landing Page
 
-| Dashboard | Incident Map |
-|---|---|
-| *add screenshot* | *add screenshot* |
+![Landing](assets/landing.png)
+
+---
+
+### AI Analysis
+
+![Analysis](assets/analysis.png)
+
+---
+
+### Incident Map
+
+![Map](assets/analysis-map.png)
+
+---
+
+### Dashboard
+
+![Dashboard](assets/dashboard.png)
 
 ## 🎥 Demo Video
 
