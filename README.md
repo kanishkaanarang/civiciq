@@ -245,7 +245,7 @@ Google Gemini · Prompt Engineering · Multimodal AI · Natural Language Underst
 
 ## 🎥 Demo Video
 
-*(Add YouTube link here)*
+*(https://youtu.be/KjMXdRfqP8w?si=c6igLpjeO0qErUdi)*
 
 ---
 
@@ -258,7 +258,7 @@ Google Gemini · Prompt Engineering · Multimodal AI · Natural Language Underst
 
 ## 👥 Team
 
-**Backstreet Geeks** — Project: **CivicIQ**, AI Decision Intelligence Platform
+**CivicIQ** — Project: **CivicIQ**, AI Decision Intelligence Platform
 
 ---
 
